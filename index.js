@@ -19,6 +19,8 @@ const client = new MongoClient(uri, {
  
 async function run() {
   const userCollection = client.db("CSE-BOOK").collection("users");
+  const postCollection = client.db("CSE-BOOK").collection("posts");
+  
   try {
     //insert userinfo into the database
     app.post("/storeUser", async (req, res) => {
@@ -27,15 +29,21 @@ async function run() {
       const result = await userCollection.insertOne(userInfo);
       res.send(result);
     });
+     //insert post
+     app.post("/post", async (req, res) => {
+      const post = req.body;
+      const result = await postCollection.insertOne(post);
+      res.send(result);
+    });
      //login user
      app.post("/loginUser", async (req, res) => {
       const userInfo = req.body;
       const result = await userCollection.findOne({email: userInfo.email});
       if(result.password === userInfo.password){
-        res.send({success: true})
+        res.send({success: true , data: result})
       }
       else{
-        res.send({success: false})
+        res.send({success: false , data: result})
       }
     });
   }

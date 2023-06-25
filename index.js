@@ -33,14 +33,32 @@ async function run() {
     //insert post
     app.post("/post", async (req, res) => {
       const post = req.body;
-      const result = await postCollection.insertOne(post);
+      const user = await userCollection.findOne({email:post.email})
+      const info = {
+        batch: user.batch,
+        email: post.email,
+        topic: post.topic,
+        text: post.text
+      }
+      const result = await postCollection.insertOne(info);
       res.send(result);
     });
 
     //insert messages
     app.post("/storeMessages", async (req, res) => {
       const post = req.body;
-      const result = await messagesCollection.insertOne(post);
+      const sender = await userCollection.findOne({email: post.sender})
+      const to = await userCollection.findOne({email: post.to})
+
+      const info = {
+        senderName : sender.name,
+        toName : to.name,
+        sender : post.sender,
+        to : post.to,
+        message: post.message
+
+      }
+      const result = await messagesCollection.insertOne(info);
       res.send(result);
     });
 
@@ -82,7 +100,7 @@ async function run() {
       const posts = await postCollection.find({ email }).toArray();
       posts.forEach((info) => {
         info["name"] = users.name;
-        info["img"] = users[index].img;
+        info["img"] = users.img;
       });
       res.send(posts);
     });
@@ -90,6 +108,20 @@ async function run() {
     //get search post
     app.get("/searchPost/:name", async (req, res) => {
       const name = req.params.name;
+      const result = await postCollection.find({ topic: name }).toArray();
+      res.send(result);
+    });
+
+    
+    //get batch post
+    app.get("/batchPost/:value", async (req, res) => {
+      const name = req.params.value;
+      const result = await postCollection.find({ batch: name }).toArray();
+      res.send(result);
+    });
+     //get type post
+     app.get("/typePost/:value", async (req, res) => {
+      const name = req.params.value;
       const result = await postCollection.find({ topic: name }).toArray();
       res.send(result);
     });
